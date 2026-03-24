@@ -6,7 +6,7 @@ import "./globals.css";
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXXXXXX";
 
 // Google Ads Conversion ID and Label
-const GOOGLE_ADS_ID = "AW-18036848730";
+const GOOGLE_ADS_ID = "AW-18036888328";
 const GOOGLE_ADS_CONVERSION_LABEL = process.env.NEXT_PUBLIC_GOOGLE_ADS_LABEL || "CONVERSION_LABEL";
 
 // Schema.org structured data
