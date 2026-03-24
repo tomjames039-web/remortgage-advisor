@@ -2,12 +2,9 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 
-// Replace with your actual Google Analytics Measurement ID
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXXXXXX";
-
-// Google Ads Conversion ID and Label
+// Google Ads Conversion Tracking
 const GOOGLE_ADS_ID = "AW-18036888328";
-const GOOGLE_ADS_CONVERSION_LABEL = process.env.NEXT_PUBLIC_GOOGLE_ADS_LABEL || "CONVERSION_LABEL";
+const GOOGLE_ADS_CONVERSION_LABEL = "0F27CIDX2Y4cEIim1JhD";
 
 // Schema.org structured data
 const organizationSchema = {
@@ -265,22 +262,6 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GOOGLE_ADS_ID}');
-          `}
-        </Script>
-
-        {/* Google Analytics */}
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}', {
-              page_path: window.location.pathname,
-            });
           `}
         </Script>
 
