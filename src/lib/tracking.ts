@@ -55,7 +55,7 @@ export function trackGoogleAdsConversion(): void {
     const win = window as typeof window & { gtag?: (...args: unknown[]) => void };
     if (typeof win.gtag === "function") {
       win.gtag("event", "conversion", {
-        send_to: "AW-18036848730/2-QkCL7Dro4cENrw0ZhD",
+        send_to: "AW-18036888328/Of27CIDX2Y4cEIim1JhD",
         value: 1.0,
         currency: "GBP",
       });
