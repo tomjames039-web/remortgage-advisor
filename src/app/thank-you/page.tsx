@@ -10,7 +10,7 @@ export default function ThankYouPage() {
     // Fire the conversion event when page loads
     if (typeof window !== "undefined" && typeof (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag === "function") {
       (window as typeof window & { gtag: (...args: unknown[]) => void }).gtag("event", "conversion", {
-        send_to: "AW-18036888328/Of27CIDX2Y4cEIim1JhD",
+        send_to: "AW-18036888328/0F27CIDX2Y4cEIim1JhD",
         value: 1.0,
         currency: "GBP",
       });
