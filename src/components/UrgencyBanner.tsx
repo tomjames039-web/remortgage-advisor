@@ -19,7 +19,7 @@ export default function UrgencyBanner() {
           <span className="sm:hidden"> – Act now</span>
         </span>
         <a
-          href="#form"
+          href="/lp"
           className="ml-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1 rounded text-sm transition-colors"
         >
           Get Quote
