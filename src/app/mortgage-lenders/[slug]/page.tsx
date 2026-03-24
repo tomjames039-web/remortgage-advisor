@@ -122,7 +122,7 @@ export default function LenderDetailPage() {
       if (response.ok) {
         if (typeof window !== "undefined" && typeof (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag === "function") {
           (window as typeof window & { gtag: (...args: unknown[]) => void }).gtag('event', 'conversion', {
-            send_to: 'AW-18036888328/Of27CIDX2Y4cEIim1JhD'
+            send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD'
           });
         }
         router.push("/thank-you");
