@@ -118,19 +118,23 @@ export default function Home() {
     formBody.append("submission_time", new Date().toISOString());
 
     try {
-      const response = await fetch("/", {
+      // Submit to Netlify Forms endpoint
+      const response = await fetch("/forms.html", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formBody.toString(),
       });
 
+      // Track Google Ads conversion regardless of response
+      if (typeof window !== "undefined" && typeof window.gtag === "function") {
+        window.gtag('event', 'conversion', {
+          send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD',
+          value: 1.0,
+          currency: 'GBP'
+        });
+      }
+
       if (response.ok) {
-        // Track Google Ads conversion
-        if (typeof window !== "undefined" && typeof (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag === "function") {
-          (window as typeof window & { gtag: (...args: unknown[]) => void }).gtag('event', 'conversion', {
-            send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD'
-          });
-        }
         router.push("/thank-you");
       } else {
         console.error("Form submission failed:", response.status);
@@ -139,6 +143,14 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Form submission error:", error);
+      // Fire conversion even on error since we're redirecting
+      if (typeof window !== "undefined" && typeof window.gtag === "function") {
+        window.gtag('event', 'conversion', {
+          send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD',
+          value: 1.0,
+          currency: 'GBP'
+        });
+      }
       router.push("/thank-you");
     } finally {
       setIsSubmitting(false);
