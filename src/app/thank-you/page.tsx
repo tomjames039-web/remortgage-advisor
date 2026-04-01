@@ -4,21 +4,61 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Script from "next/script";
 
+// Google Ads conversion config
+const GOOGLE_ADS_ID = "AW-18036888328";
+const CONVERSION_LABEL = "0F27CIDX2Y4cEIim1JhD";
+
 export default function ThankYouPage() {
   // Track conversion when page loads
   useEffect(() => {
-    // Fire the conversion event when page loads
-    if (typeof window !== "undefined" && typeof (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag === "function") {
-      (window as typeof window & { gtag: (...args: unknown[]) => void }).gtag("event", "conversion", {
-        send_to: "AW-18036888328/0F27CIDX2Y4cEIim1JhD",
-        value: 1.0,
-        currency: "GBP",
-      });
+    // Function to fire conversion
+    const fireConversion = () => {
+      if (typeof window !== "undefined" && typeof window.gtag === "function") {
+        window.gtag("event", "conversion", {
+          send_to: `${GOOGLE_ADS_ID}/${CONVERSION_LABEL}`,
+          value: 1.0,
+          currency: "GBP",
+        });
+        console.log("Google Ads conversion fired successfully");
+        return true;
+      }
+      return false;
+    };
+
+    // Try immediately
+    if (!fireConversion()) {
+      // If gtag not ready, retry a few times
+      let attempts = 0;
+      const maxAttempts = 10;
+      const interval = setInterval(() => {
+        attempts++;
+        if (fireConversion() || attempts >= maxAttempts) {
+          clearInterval(interval);
+          if (attempts >= maxAttempts) {
+            console.warn("Could not fire Google Ads conversion after max attempts");
+          }
+        }
+      }, 500);
+
+      return () => clearInterval(interval);
     }
   }, []);
 
   return (
     <main className="min-h-screen bg-gray-50">
+      {/* Google Ads Conversion Script - Backup */}
+      <Script id="conversion-track" strategy="afterInteractive">
+        {`
+          if (typeof gtag === 'function') {
+            gtag('event', 'conversion', {
+              'send_to': '${GOOGLE_ADS_ID}/${CONVERSION_LABEL}',
+              'value': 1.0,
+              'currency': 'GBP'
+            });
+          }
+        `}
+      </Script>
+
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
