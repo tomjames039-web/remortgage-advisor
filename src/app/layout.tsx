@@ -6,7 +6,10 @@ import "./globals.css";
 const GOOGLE_ADS_ID = "AW-18036888328";
 
 // Google Analytics 4 - Replace with your actual GA4 Measurement ID
-const GA4_MEASUREMENT_ID = "G-XXXXXXXXXX"; // TODO: Get this from Google Analytics
+const GA4_MEASUREMENT_ID = "G-XXXXXXXXXX"; // TODO: Replace with your GA4 ID
+
+// Facebook Pixel - Replace with your actual Pixel ID
+const FB_PIXEL_ID = "XXXXXXXXXXXXXXX"; // TODO: Replace with your Facebook Pixel ID
 
 // Schema.org structured data
 const organizationSchema = {
@@ -276,10 +279,25 @@ export default function RootLayout({
           src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
           strategy="beforeInteractive"
         />
-        {/* Uncomment below when you have your GA4 Measurement ID */}
+
+        {/* Facebook Pixel - Uncomment when you have your Pixel ID */}
         {/* <Script
-          src={\`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}\`}
+          id="fb-pixel"
           strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: \`
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${FB_PIXEL_ID}');
+              fbq('track', 'PageView');
+            \`,
+          }}
         /> */}
       </head>
       <body className="antialiased">

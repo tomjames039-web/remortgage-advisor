@@ -4,6 +4,10 @@
 [build]
   command = "bun run build"
   publish = ".next"
+  functions = "netlify/functions"
+
+[functions]
+  directory = "netlify/functions"
 
 # Redirect form submissions to Netlify Forms endpoint
 [[redirects]]
