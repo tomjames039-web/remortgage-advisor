@@ -109,17 +109,33 @@ export default function LenderDetailPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const form = e.currentTarget;
-    const formDataObj = new FormData(form);
+    // Build form data manually to ensure all fields are captured
+    const formBody = new URLSearchParams();
+    formBody.append("form-name", "lender-enquiry");
+    formBody.append("lenderName", lender?.name || "");
+    formBody.append("fullName", formData.fullName);
+    formBody.append("email", formData.email);
+    formBody.append("contactNumber", formData.contactNumber);
+    formBody.append("additionalNumber", formData.additionalNumber);
+    formBody.append("postcode", formData.postcode);
+    formBody.append("currentLender", formData.currentLender);
+    formBody.append("mortgageAmount", formData.mortgageAmount);
+    formBody.append("propertyValue", formData.propertyValue);
+    formBody.append("mortgagePurpose", formData.mortgagePurpose);
+    formBody.append("mortgageLength", formData.mortgageLength);
+    formBody.append("combinedIncome", formData.combinedIncome);
+    formBody.append("landing_page", window.location.href);
+    formBody.append("submission_time", new Date().toISOString());
 
     try {
       const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formDataObj as unknown as Record<string, string>).toString(),
+        body: formBody.toString(),
       });
 
       if (response.ok) {
+        // Track Google Ads conversion
         if (typeof window !== "undefined" && typeof (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag === "function") {
           (window as typeof window & { gtag: (...args: unknown[]) => void }).gtag('event', 'conversion', {
             send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD'
@@ -127,6 +143,7 @@ export default function LenderDetailPage() {
         }
         router.push("/thank-you");
       } else {
+        console.error("Form submission failed:", response.status);
         router.push("/thank-you");
       }
     } catch (error) {

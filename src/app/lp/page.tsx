@@ -62,24 +62,35 @@ export default function PPCLandingPage() {
     setIsSubmitting(true);
 
     const utmParams = getStoredUTMParams();
-    const form = e.currentTarget;
-    const formDataObj = new FormData(form);
 
-    // Add UTM params to form data
+    // Build form data manually to ensure all fields are captured
+    const formBody = new URLSearchParams();
+    formBody.append("form-name", "ppc-landing-enquiry");
+    formBody.append("fullName", formData.fullName);
+    formBody.append("email", formData.email);
+    formBody.append("contactNumber", formData.contactNumber);
+    formBody.append("postcode", formData.postcode);
+    formBody.append("mortgageAmount", formData.mortgageAmount);
+    formBody.append("propertyValue", formData.propertyValue);
+    formBody.append("currentLender", formData.currentLender);
+    formBody.append("mortgagePurpose", formData.mortgagePurpose);
+
+    // Add UTM params
     Object.entries(utmParams).forEach(([key, value]) => {
-      if (value) formDataObj.append(key, value);
+      if (value) formBody.append(key, value);
     });
-    formDataObj.append("landing_page", window.location.href);
-    formDataObj.append("submission_time", new Date().toISOString());
+    formBody.append("landing_page", window.location.href);
+    formBody.append("submission_time", new Date().toISOString());
 
     try {
       const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formDataObj as unknown as Record<string, string>).toString(),
+        body: formBody.toString(),
       });
 
       if (response.ok) {
+        // Track Google Ads conversion
         if (typeof window !== "undefined" && typeof (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag === "function") {
           (window as typeof window & { gtag: (...args: unknown[]) => void }).gtag('event', 'conversion', {
             send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD'
@@ -87,6 +98,7 @@ export default function PPCLandingPage() {
         }
         router.push("/thank-you");
       } else {
+        console.error("Form submission failed:", response.status);
         router.push("/thank-you");
       }
     } catch (error) {
