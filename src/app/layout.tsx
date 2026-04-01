@@ -5,6 +5,9 @@ import "./globals.css";
 // Google Ads Conversion Tracking
 const GOOGLE_ADS_ID = "AW-18036888328";
 
+// Google Analytics 4 - Replace with your actual GA4 Measurement ID
+const GA4_MEASUREMENT_ID = "G-XXXXXXXXXX"; // TODO: Get this from Google Analytics
+
 // Schema.org structured data
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -250,7 +253,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* Google Ads Conversion Tracking - Load First */}
+        {/* Google Analytics 4 + Google Ads Tracking */}
         <Script
           id="gtag-init"
           strategy="beforeInteractive"
@@ -260,7 +263,12 @@ export default function RootLayout({
               function gtag(){dataLayer.push(arguments);}
               window.gtag = gtag;
               gtag('js', new Date());
+
+              // Google Ads
               gtag('config', '${GOOGLE_ADS_ID}');
+
+              // Google Analytics 4 (uncomment when you have your GA4 ID)
+              // gtag('config', '${GA4_MEASUREMENT_ID}');
             `,
           }}
         />
@@ -268,6 +276,11 @@ export default function RootLayout({
           src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
           strategy="beforeInteractive"
         />
+        {/* Uncomment below when you have your GA4 Measurement ID */}
+        {/* <Script
+          src={\`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}\`}
+          strategy="afterInteractive"
+        /> */}
       </head>
       <body className="antialiased">
         {children}
