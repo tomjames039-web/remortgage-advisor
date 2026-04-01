@@ -4,7 +4,6 @@ import "./globals.css";
 
 // Google Ads Conversion Tracking
 const GOOGLE_ADS_ID = "AW-18036888328";
-const GOOGLE_ADS_CONVERSION_LABEL = "0F27CIDX2Y4cEIim1JhD";
 
 // Schema.org structured data
 const organizationSchema = {
@@ -251,32 +250,24 @@ export default function RootLayout({
           }}
         />
 
-        {/* Google Ads Conversion Tracking */}
+        {/* Google Ads Conversion Tracking - Load First */}
+        <Script
+          id="gtag-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              gtag('js', new Date());
+              gtag('config', '${GOOGLE_ADS_ID}');
+            `,
+          }}
+        />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
-        <Script id="google-ads-config" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GOOGLE_ADS_ID}');
-          `}
-        </Script>
-
-        {/* Conversion tracking function - call this on form submission */}
-        <Script id="conversion-function" strategy="afterInteractive">
-          {`
-            window.trackConversion = function() {
-              gtag('event', 'conversion', {
-                'send_to': '${GOOGLE_ADS_ID}/${GOOGLE_ADS_CONVERSION_LABEL}',
-                'value': 1.0,
-                'currency': 'GBP'
-              });
-            };
-          `}
-        </Script>
       </head>
       <body className="antialiased">
         {children}
