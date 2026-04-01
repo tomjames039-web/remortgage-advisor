@@ -1,0 +1,9 @@
+[images]
+  remote_images = ["https://source.unsplash.com/.*", "https://images.unsplash.com/.*", "https://ext.same-assets.com/.*", "https://ugc.same-assets.com/.*", "https://logos-world.net/.*", "https://1000logos.net/.*", "https://upload.wikimedia.org/.*", "https://cnrywhrfn.s3.eu-west-2.amazonaws.com/.*", "https://cdn.prod.website-files.com/.*", "https://i1.wp.com/.*", "https://download.logo.wine/.*", "https://cdn.freebiesupply.com/.*", "https://storage.googleapis.com/.*", "https://trustmarque.com/.*", "https://htgmortgages.com/.*", "https://d1pt6w2mt2xqso.cloudfront.net/.*"]
+
+[build]
+  command = "bun run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
