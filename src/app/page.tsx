@@ -180,18 +180,24 @@ export default function Home() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/mortgage-lenders" className="text-gray-600 hover:text-[#1c4953] font-medium transition-colors">
+            <nav className="hidden lg:flex items-center space-x-1">
+              <Link href="/mortgage-lenders" className="px-3 py-2 text-gray-600 hover:text-[#1c4953] font-medium transition-colors text-sm">
                 Mortgage Lenders
               </Link>
-              <Link href="#how-it-works" className="text-gray-600 hover:text-[#1c4953] font-medium transition-colors">
-                How It Works
+              <Link href="/mortgage-deals" className="px-3 py-2 text-gray-600 hover:text-[#1c4953] font-medium transition-colors text-sm">
+                Mortgage Deals
               </Link>
-              <Link href="/about" className="text-gray-600 hover:text-[#1c4953] font-medium transition-colors">
-                About Us
+              <Link href="/mortgages-for" className="px-3 py-2 text-gray-600 hover:text-[#1c4953] font-medium transition-colors text-sm">
+                Mortgages For
               </Link>
-              <Link href="/contact" className="text-gray-600 hover:text-[#1c4953] font-medium transition-colors">
-                Contact
+              <Link href="/mortgage-types" className="px-3 py-2 text-gray-600 hover:text-[#1c4953] font-medium transition-colors text-sm">
+                Mortgage Types
+              </Link>
+              <Link href="/mortgage-advice" className="px-3 py-2 text-gray-600 hover:text-[#1c4953] font-medium transition-colors text-sm">
+                Advice
+              </Link>
+              <Link href="/about" className="px-3 py-2 text-gray-600 hover:text-[#1c4953] font-medium transition-colors text-sm">
+                About
               </Link>
               <a
                 href={`tel:${PHONE_NUMBER.replace(/\s/g, "")}`}
@@ -207,7 +213,7 @@ export default function Home() {
             {/* Mobile menu button */}
             <button
               type="button"
-              className="md:hidden p-2 text-gray-600"
+              className="lg:hidden p-2 text-gray-600"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,17 +228,29 @@ export default function Home() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <nav className="md:hidden pb-4 space-y-2">
+            <nav className="lg:hidden pb-4 space-y-2 border-t border-gray-100 pt-4">
               <Link href="/mortgage-lenders" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
                 Mortgage Lenders
               </Link>
-              <Link href="#how-it-works" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
-                How It Works
+              <Link href="/mortgage-deals" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
+                Mortgage Deals
               </Link>
-              <Link href="#about" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
+              <Link href="/mortgages-for" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
+                Mortgages For
+              </Link>
+              <Link href="/mortgage-types" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
+                Mortgage Types
+              </Link>
+              <Link href="/mortgage-advice" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
+                Mortgage Advice
+              </Link>
+              <Link href="/government-schemes" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
+                Government Schemes
+              </Link>
+              <Link href="/about" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
                 About Us
               </Link>
-              <Link href="#contact" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
+              <Link href="/contact" className="block py-2 text-gray-600 hover:text-[#1c4953] font-medium">
                 Contact
               </Link>
             </nav>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Head from "next/head";
 import { useParams, useRouter } from "next/navigation";
 import { getLenderBySlug, lenders } from "@/data/lenders";
+import { getLenderContentBySlug, hasDetailedContent } from "@/data/lender-content";
 
 // Generate lender-specific schema
 const generateLenderSchema = (lender: { name: string; slug: string; description: string }) => ({
@@ -577,13 +578,28 @@ export default function LenderDetailPage() {
       {/* Lender Description Section */}
       <section className="py-12 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#1c4953] mb-6">
+            Compare {lender.name} Remortgage Rates & Deals
+          </h2>
           <div className="prose prose-lg max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-6">
-              {lender.description}
-            </p>
-            <p className="text-gray-700 leading-relaxed mb-6">
-              Whether you're a first-time buyer, planning to move to a new home, or looking to refinance your existing mortgage, {lender.name} provides personalised assistance tailored to your unique circumstances. Their professional guidance ensures that you make informed decisions throughout the process.
-            </p>
+            {hasDetailedContent(lender.slug) ? (
+              <>
+                {getLenderContentBySlug(lender.slug)?.paragraphs.map((paragraph, index) => (
+                  <p key={index} className="text-gray-700 leading-relaxed mb-6">
+                    {paragraph}
+                  </p>
+                ))}
+              </>
+            ) : (
+              <>
+                <p className="text-gray-700 leading-relaxed mb-6">
+                  {lender.description}
+                </p>
+                <p className="text-gray-700 leading-relaxed mb-6">
+                  Whether you're a first-time buyer, planning to move to a new home, or looking to refinance your existing mortgage, {lender.name} provides personalised assistance tailored to your unique circumstances. Their professional guidance ensures that you make informed decisions throughout the process.
+                </p>
+              </>
+            )}
             <p className="text-gray-700 leading-relaxed">
               <Link href="#form" className="text-[#1c4953] font-semibold hover:underline">
                 Fill in our form
@@ -651,12 +667,23 @@ export default function LenderDetailPage() {
               </div>
               <h3 className="text-2xl font-bold text-[#1c4953] mb-4">What People Say</h3>
               <div className="space-y-4">
-                <blockquote className="text-gray-600 italic border-l-4 border-[#5da593] pl-4 text-left text-sm">
-                  "He has kept me posted every step of the way and explained everything fully. There were no hidden costs. I would definitely recommend and will not hesitate to use them in the future"
-                </blockquote>
-                <blockquote className="text-gray-600 italic border-l-4 border-[#5da593] pl-4 text-left text-sm">
-                  "Very satisfied with the service received! The advisor was excellent handling our remortgage and was very helpful with all questions we had."
-                </blockquote>
+                {hasDetailedContent(lender.slug) && getLenderContentBySlug(lender.slug)?.testimonials ? (
+                  getLenderContentBySlug(lender.slug)?.testimonials.map((testimonial, index) => (
+                    <blockquote key={index} className="text-gray-600 italic border-l-4 border-[#5da593] pl-4 text-left text-sm">
+                      "{testimonial.quote}"
+                      <footer className="text-gray-500 mt-1 not-italic text-xs">— {testimonial.author}</footer>
+                    </blockquote>
+                  ))
+                ) : (
+                  <>
+                    <blockquote className="text-gray-600 italic border-l-4 border-[#5da593] pl-4 text-left text-sm">
+                      "He has kept me posted every step of the way and explained everything fully. There were no hidden costs. I would definitely recommend and will not hesitate to use them in the future"
+                    </blockquote>
+                    <blockquote className="text-gray-600 italic border-l-4 border-[#5da593] pl-4 text-left text-sm">
+                      "Very satisfied with the service received! The advisor was excellent handling our remortgage and was very helpful with all questions we had."
+                    </blockquote>
+                  </>
+                )}
               </div>
             </div>
           </div>

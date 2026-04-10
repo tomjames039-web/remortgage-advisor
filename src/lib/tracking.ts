@@ -7,6 +7,11 @@ export interface UTMParams {
   utm_term?: string;
   utm_content?: string;
   gclid?: string; // Google Click ID
+  // Google Ads native parameters
+  gad_source?: string;
+  gad_campaignid?: string;
+  gbraid?: string; // Google's iOS attribution
+  wbraid?: string; // Google's web attribution
 }
 
 // Get UTM parameters from URL
@@ -15,14 +20,33 @@ export function getUTMParams(): UTMParams {
 
   const params = new URLSearchParams(window.location.search);
 
-  return {
+  // Get standard UTM params
+  const utmParams: UTMParams = {
     utm_source: params.get("utm_source") || undefined,
     utm_medium: params.get("utm_medium") || undefined,
     utm_campaign: params.get("utm_campaign") || undefined,
     utm_term: params.get("utm_term") || undefined,
     utm_content: params.get("utm_content") || undefined,
     gclid: params.get("gclid") || undefined,
+    // Google Ads native parameters
+    gad_source: params.get("gad_source") || undefined,
+    gad_campaignid: params.get("gad_campaignid") || undefined,
+    gbraid: params.get("gbraid") || undefined,
+    wbraid: params.get("wbraid") || undefined,
   };
+
+  // If no utm_source but we have gad_source, set utm_source to "google"
+  if (!utmParams.utm_source && (utmParams.gclid || utmParams.gad_source)) {
+    utmParams.utm_source = "google";
+    utmParams.utm_medium = "cpc";
+  }
+
+  // If we have gad_campaignid, use it as utm_campaign if not already set
+  if (!utmParams.utm_campaign && utmParams.gad_campaignid) {
+    utmParams.utm_campaign = utmParams.gad_campaignid;
+  }
+
+  return utmParams;
 }
 
 // Store UTM params in sessionStorage (persists across page navigation)
