@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { lenders as allLenders } from "@/data/lenders";
-import { storeUTMParams, getStoredUTMParams } from "@/lib/tracking";
+import { storeUTMParams } from "@/lib/tracking";
+import { submitLeadToSupabase } from "@/lib/api";
 import SocialProofNotification from "@/components/SocialProofNotification";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import UrgencyBanner from "@/components/UrgencyBanner";
@@ -27,8 +28,6 @@ const homepageLenders = [
   { name: "Metro Bank", slug: "metro-bank", logo: "https://storage.googleapis.com/gweb-cloudblog-publish/images/metro-bank-logoano0.max-900x900.PNG" },
   { name: "Coventry BS", slug: "coventry-building-society", logo: "https://trustmarque.com/hs-fs/hubfs/coventry-building-society-logo-vector.png" },
 ];
-
-
 
 const currentLenders = [
   "Select your lender",
@@ -73,6 +72,7 @@ export default function Home() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; error?: string } | null>(null);
   const router = useRouter();
 
   // Store UTM params on page load
@@ -92,37 +92,21 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    const utmParams = getStoredUTMParams();
-
-    // Build form data manually to ensure all fields are captured
-    const formBody = new URLSearchParams();
-    formBody.append("form-name", "homepage-enquiry");
-    formBody.append("fullName", formData.fullName);
-    formBody.append("email", formData.email);
-    formBody.append("contactNumber", formData.contactNumber);
-    formBody.append("additionalNumber", formData.additionalNumber);
-    formBody.append("postcode", formData.postcode);
-    formBody.append("currentLender", formData.currentLender);
-    formBody.append("mortgageAmount", formData.mortgageAmount);
-    formBody.append("propertyValue", formData.propertyValue);
-    formBody.append("mortgagePurpose", formData.mortgagePurpose);
-    formBody.append("mortgageLength", formData.mortgageLength);
-    formBody.append("combinedIncome", formData.combinedIncome);
-
-    // Add UTM params
-    Object.entries(utmParams).forEach(([key, value]) => {
-      if (value) formBody.append(key, value);
-    });
-    formBody.append("landing_page", window.location.href);
-    formBody.append("submission_time", new Date().toISOString());
+    setSubmitResult(null);
 
     try {
-      // Submit to Netlify Forms endpoint
-      const response = await fetch("/forms.html", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formBody.toString(),
+      // Submit to Supabase
+      const result = await submitLeadToSupabase({
+        fullName: formData.fullName,
+        email: formData.email,
+        contactNumber: formData.contactNumber,
+        postcode: formData.postcode,
+        mortgageAmount: formData.mortgageAmount,
+        propertyValue: formData.propertyValue,
+        combinedIncome: formData.combinedIncome,
+        currentLender: formData.currentLender,
+        mortgagePurpose: formData.mortgagePurpose,
+        mortgageLength: formData.mortgageLength,
       });
 
       // Track Google Ads conversion regardless of response
@@ -134,24 +118,14 @@ export default function Home() {
         });
       }
 
-      if (response.ok) {
+      if (result.success) {
         router.push("/thank-you");
       } else {
-        console.error("Form submission failed:", response.status);
-        // Still redirect but log the error
-        router.push("/thank-you");
+        setSubmitResult({ success: false, error: result.error || "Something went wrong. Please try again." });
       }
     } catch (error) {
       console.error("Form submission error:", error);
-      // Fire conversion even on error since we're redirecting
-      if (typeof window !== "undefined" && typeof window.gtag === "function") {
-        window.gtag('event', 'conversion', {
-          send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD',
-          value: 1.0,
-          currency: 'GBP'
-        });
-      }
-      router.push("/thank-you");
+      setSubmitResult({ success: false, error: "Something went wrong. Please try again or call us directly." });
     } finally {
       setIsSubmitting(false);
     }
@@ -306,18 +280,8 @@ export default function Home() {
           {/* Lead Capture Form */}
           <form
             onSubmit={handleSubmit}
-            name="homepage-enquiry"
-            method="POST"
-            data-netlify="true"
-            netlify-honeypot="bot-field"
             className="max-w-4xl mx-auto bg-white/10 backdrop-blur-sm rounded-xl p-6 md:p-8"
           >
-            <input type="hidden" name="form-name" value="homepage-enquiry" />
-            <p className="hidden">
-              <label>
-                Don't fill this out: <input name="bot-field" />
-              </label>
-            </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="form-label form-label-required">Full Name</label>
@@ -494,6 +458,12 @@ export default function Home() {
               </label>
             </div>
 
+            {submitResult && !submitResult.success && (
+              <div className="mb-4 text-red-500 bg-red-50 border border-red-200 rounded p-3 text-center">
+                {submitResult.error}
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isSubmitting}
@@ -660,8 +630,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-
 
       {/* Disclaimer Section */}
       <section className="py-8 bg-[#1c4953] text-white/90">

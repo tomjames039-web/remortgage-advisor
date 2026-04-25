@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { storeUTMParams, getStoredUTMParams } from "@/lib/tracking";
+import { storeUTMParams } from "@/lib/tracking";
+import { submitLPLeadToSupabase } from "@/lib/api";
 import SocialProofNotification from "@/components/SocialProofNotification";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import UrgencyBanner from "@/components/UrgencyBanner";
@@ -41,6 +42,7 @@ export default function PPCLandingPage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; error?: string } | null>(null);
   const router = useRouter();
 
   // Store UTM params on page load
@@ -60,34 +62,20 @@ export default function PPCLandingPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    const utmParams = getStoredUTMParams();
-
-    // Build form data manually to ensure all fields are captured
-    const formBody = new URLSearchParams();
-    formBody.append("form-name", "ppc-landing-enquiry");
-    formBody.append("fullName", formData.fullName);
-    formBody.append("email", formData.email);
-    formBody.append("contactNumber", formData.contactNumber);
-    formBody.append("postcode", formData.postcode);
-    formBody.append("mortgageAmount", formData.mortgageAmount);
-    formBody.append("propertyValue", formData.propertyValue);
-    formBody.append("currentLender", formData.currentLender);
-    formBody.append("mortgagePurpose", formData.mortgagePurpose);
-
-    // Add UTM params
-    Object.entries(utmParams).forEach(([key, value]) => {
-      if (value) formBody.append(key, value);
-    });
-    formBody.append("landing_page", window.location.href);
-    formBody.append("submission_time", new Date().toISOString());
+    setSubmitResult(null);
 
     try {
-      // Submit to Netlify Forms endpoint
-      const response = await fetch("/forms.html", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formBody.toString(),
+      // Submit to Supabase with all tracking data
+      const result = await submitLPLeadToSupabase({
+        fullName: formData.fullName,
+        email: formData.email,
+        contactNumber: formData.contactNumber,
+        postcode: formData.postcode,
+        mortgageAmount: formData.mortgageAmount,
+        propertyValue: formData.propertyValue,
+        currentLender: formData.currentLender,
+        mortgagePurpose: formData.mortgagePurpose,
+        agreedToTerms: formData.agreedToTerms,
       });
 
       // Track Google Ads conversion regardless of response
@@ -99,23 +87,14 @@ export default function PPCLandingPage() {
         });
       }
 
-      if (response.ok) {
+      if (result.success) {
         router.push("/thank-you");
       } else {
-        console.error("Form submission failed:", response.status);
-        router.push("/thank-you");
+        setSubmitResult({ success: false, error: result.error || "Something went wrong. Please try again." });
       }
     } catch (error) {
       console.error("Form submission error:", error);
-      // Fire conversion even on error since we're redirecting
-      if (typeof window !== "undefined" && typeof window.gtag === "function") {
-        window.gtag('event', 'conversion', {
-          send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD',
-          value: 1.0,
-          currency: 'GBP'
-        });
-      }
-      router.push("/thank-you");
+      setSubmitResult({ success: false, error: "Something went wrong. Please try again or call us directly." });
     } finally {
       setIsSubmitting(false);
     }
@@ -199,196 +178,191 @@ export default function PPCLandingPage() {
 
           {/* Form */}
           <form
-              onSubmit={handleSubmit}
-              name="ppc-landing-enquiry"
-              method="POST"
-              data-netlify="true"
-              netlify-honeypot="bot-field"
-              className="max-w-2xl mx-auto bg-white rounded-xl p-6 md:p-8 shadow-2xl"
+            onSubmit={handleSubmit}
+            className="max-w-2xl mx-auto bg-white rounded-xl p-6 md:p-8 shadow-2xl"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
+                  placeholder="John Smith"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
+                  placeholder="07123 456789"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
+                  placeholder="john@example.com"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Postcode <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="postcode"
+                  value={formData.postcode}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
+                  placeholder="SW1A 1AA"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Mortgage Amount <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
+                  <input
+                    type="text"
+                    name="mortgageAmount"
+                    value={formData.mortgageAmount}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 pl-8 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
+                    placeholder="200,000"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Property Value <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
+                  <input
+                    type="text"
+                    name="propertyValue"
+                    value={formData.propertyValue}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 pl-8 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
+                    placeholder="300,000"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Current Lender
+                </label>
+                <select
+                  name="currentLender"
+                  value={formData.currentLender}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent bg-white"
+                >
+                  {currentLenders.map((lender) => (
+                    <option key={lender} value={lender === "Select your lender" ? "" : lender}>
+                      {lender}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Mortgage Purpose
+                </label>
+                <select
+                  name="mortgagePurpose"
+                  value={formData.mortgagePurpose}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent bg-white"
+                >
+                  {mortgagePurposes.map((purpose) => (
+                    <option key={purpose} value={purpose === "Select purpose" ? "" : purpose}>
+                      {purpose}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.agreedToTerms}
+                  onChange={handleCheckboxChange}
+                  className="mt-1 w-4 h-4 rounded border-gray-300 text-[#5da593] focus:ring-[#5da593]"
+                  required
+                />
+                <span className="text-sm text-gray-600">
+                  I agree to be contacted by an FCA authorised mortgage advisor and accept the{" "}
+                  <Link href="/terms" className="text-[#5da593] underline">terms</Link> and{" "}
+                  <Link href="/privacy" className="text-[#5da593] underline">privacy policy</Link>.
+                  <span className="text-red-500"> *</span>
+                </span>
+              </label>
+            </div>
+
+            {submitResult && !submitResult.success && (
+              <div className="mb-4 text-red-500 bg-red-50 border border-red-200 rounded p-3 text-center">
+                {submitResult.error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-[#5da593] text-white font-bold text-lg py-4 rounded-lg hover:bg-[#4a8a7a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <input type="hidden" name="form-name" value="ppc-landing-enquiry" />
-              <p className="hidden">
-                <label>
-                  Don't fill this out: <input name="bot-field" />
-                </label>
-              </p>
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                "Get My Free Quote"
+              )}
+            </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
-                    placeholder="John Smith"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="contactNumber"
-                    value={formData.contactNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
-                    placeholder="07123 456789"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
-                    placeholder="john@example.com"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Postcode <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="postcode"
-                    value={formData.postcode}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
-                    placeholder="SW1A 1AA"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Mortgage Amount <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
-                    <input
-                      type="text"
-                      name="mortgageAmount"
-                      value={formData.mortgageAmount}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 pl-8 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
-                      placeholder="200,000"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Property Value <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
-                    <input
-                      type="text"
-                      name="propertyValue"
-                      value={formData.propertyValue}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 pl-8 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent"
-                      placeholder="300,000"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Current Lender
-                  </label>
-                  <select
-                    name="currentLender"
-                    value={formData.currentLender}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent bg-white"
-                  >
-                    {currentLenders.map((lender) => (
-                      <option key={lender} value={lender === "Select your lender" ? "" : lender}>
-                        {lender}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Mortgage Purpose
-                  </label>
-                  <select
-                    name="mortgagePurpose"
-                    value={formData.mortgagePurpose}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#5da593] focus:border-transparent bg-white"
-                  >
-                    {mortgagePurposes.map((purpose) => (
-                      <option key={purpose} value={purpose === "Select purpose" ? "" : purpose}>
-                        {purpose}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <label className="flex items-start space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.agreedToTerms}
-                    onChange={handleCheckboxChange}
-                    className="mt-1 w-4 h-4 rounded border-gray-300 text-[#5da593] focus:ring-[#5da593]"
-                    required
-                  />
-                  <span className="text-sm text-gray-600">
-                    I agree to be contacted by an FCA authorised mortgage advisor and accept the{" "}
-                    <Link href="/terms" className="text-[#5da593] underline">terms</Link> and{" "}
-                    <Link href="/privacy" className="text-[#5da593] underline">privacy policy</Link>.
-                    <span className="text-red-500"> *</span>
-                  </span>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-[#5da593] text-white font-bold text-lg py-4 rounded-lg hover:bg-[#4a8a7a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Processing...
-                  </>
-                ) : (
-                  "Get My Free Quote"
-                )}
-              </button>
-
-              <p className="text-center text-sm text-gray-500 mt-4">
-                No fees. No obligation. Compare rates in 60 seconds.
-              </p>
-            </form>
+            <p className="text-center text-sm text-gray-500 mt-4">
+              No fees. No obligation. Compare rates in 60 seconds.
+            </p>
+          </form>
         </div>
       </section>
 

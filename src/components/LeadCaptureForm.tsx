@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { submitLeadToSupabase } from "@/lib/api";
 
 const mortgagePurposes = [
   "Select purpose",
@@ -27,6 +28,7 @@ export default function LeadCaptureForm({
 }: LeadCaptureFormProps) {
   const [formData, setFormData] = useState({
     fullName: "",
+    email: "",
     contactNumber: "",
     postcode: "",
     mortgagePurpose: "",
@@ -34,6 +36,7 @@ export default function LeadCaptureForm({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; error?: string } | null>(null);
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -48,23 +51,19 @@ export default function LeadCaptureForm({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    const formBody = new URLSearchParams();
-    formBody.append("form-name", "content-page-enquiry");
-    formBody.append("fullName", formData.fullName);
-    formBody.append("contactNumber", formData.contactNumber);
-    formBody.append("postcode", formData.postcode);
-    formBody.append("mortgagePurpose", formData.mortgagePurpose);
-    formBody.append("landing_page", window.location.href);
-    formBody.append("submission_time", new Date().toISOString());
+    setSubmitResult(null);
 
     try {
-      const response = await fetch("/forms.html", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formBody.toString(),
+      // Submit to Supabase
+      const result = await submitLeadToSupabase({
+        fullName: formData.fullName,
+        email: formData.email,
+        contactNumber: formData.contactNumber,
+        postcode: formData.postcode,
+        mortgagePurpose: formData.mortgagePurpose,
       });
 
+      // Track Google Ads conversion regardless of response
       if (typeof window !== "undefined" && typeof window.gtag === "function") {
         window.gtag("event", "conversion", {
           send_to: "AW-18036888328/0F27CIDX2Y4cEIim1JhD",
@@ -73,22 +72,14 @@ export default function LeadCaptureForm({
         });
       }
 
-      if (response.ok) {
+      if (result.success) {
         router.push("/thank-you");
       } else {
-        console.error("Form submission failed:", response.status);
-        router.push("/thank-you");
+        setSubmitResult({ success: false, error: result.error || "Something went wrong. Please try again." });
       }
     } catch (error) {
       console.error("Form submission error:", error);
-      if (typeof window !== "undefined" && typeof window.gtag === "function") {
-        window.gtag("event", "conversion", {
-          send_to: "AW-18036888328/0F27CIDX2Y4cEIim1JhD",
-          value: 1.0,
-          currency: "GBP",
-        });
-      }
-      router.push("/thank-you");
+      setSubmitResult({ success: false, error: "Something went wrong. Please try again or call us directly." });
     } finally {
       setIsSubmitting(false);
     }
@@ -98,20 +89,7 @@ export default function LeadCaptureForm({
     <div className={`bg-[#1c4953] rounded-xl p-6 md:p-8 ${className}`}>
       <h3 className="text-xl md:text-2xl font-bold text-white text-center mb-6">{title}</h3>
 
-      <form
-        onSubmit={handleSubmit}
-        name="content-page-enquiry"
-        method="POST"
-        data-netlify="true"
-        netlify-honeypot="bot-field"
-      >
-        <input type="hidden" name="form-name" value="content-page-enquiry" />
-        <p className="hidden">
-          <label>
-            Don't fill this out: <input name="bot-field" />
-          </label>
-        </p>
-
+      <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div>
             <label className="block text-white text-sm font-medium mb-2">
@@ -121,6 +99,20 @@ export default function LeadCaptureForm({
               type="text"
               name="fullName"
               value={formData.fullName}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-[#5da593]"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-white text-sm font-medium mb-2">
+              Email <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
               onChange={handleInputChange}
               className="w-full px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-[#5da593]"
               required
@@ -197,6 +189,12 @@ export default function LeadCaptureForm({
               </span>
             </label>
           </div>
+
+          {submitResult && !submitResult.success && (
+            <div className="text-red-400 bg-red-900/30 border border-red-400/50 rounded p-3 text-center text-sm">
+              {submitResult.error}
+            </div>
+          )}
 
           <button
             type="submit"

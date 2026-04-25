@@ -6,6 +6,7 @@ import Head from "next/head";
 import { useParams, useRouter } from "next/navigation";
 import { getLenderBySlug, lenders } from "@/data/lenders";
 import { getLenderContentBySlug, hasDetailedContent } from "@/data/lender-content";
+import { submitLeadToSupabase } from "@/lib/api";
 
 // Generate lender-specific schema
 const generateLenderSchema = (lender: { name: string; slug: string; description: string }) => ({
@@ -95,6 +96,7 @@ export default function LenderDetailPage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; error?: string } | null>(null);
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -109,31 +111,21 @@ export default function LenderDetailPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Build form data manually to ensure all fields are captured
-    const formBody = new URLSearchParams();
-    formBody.append("form-name", "lender-enquiry");
-    formBody.append("lenderName", lender?.name || "");
-    formBody.append("fullName", formData.fullName);
-    formBody.append("email", formData.email);
-    formBody.append("contactNumber", formData.contactNumber);
-    formBody.append("additionalNumber", formData.additionalNumber);
-    formBody.append("postcode", formData.postcode);
-    formBody.append("currentLender", formData.currentLender);
-    formBody.append("mortgageAmount", formData.mortgageAmount);
-    formBody.append("propertyValue", formData.propertyValue);
-    formBody.append("mortgagePurpose", formData.mortgagePurpose);
-    formBody.append("mortgageLength", formData.mortgageLength);
-    formBody.append("combinedIncome", formData.combinedIncome);
-    formBody.append("landing_page", window.location.href);
-    formBody.append("submission_time", new Date().toISOString());
+    setSubmitResult(null);
 
     try {
-      // Submit to Netlify Forms endpoint
-      const response = await fetch("/forms.html", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formBody.toString(),
+      // Submit to Supabase
+      const result = await submitLeadToSupabase({
+        fullName: formData.fullName,
+        email: formData.email,
+        contactNumber: formData.contactNumber,
+        postcode: formData.postcode,
+        mortgageAmount: formData.mortgageAmount,
+        propertyValue: formData.propertyValue,
+        combinedIncome: formData.combinedIncome,
+        currentLender: formData.currentLender,
+        mortgagePurpose: formData.mortgagePurpose,
+        mortgageLength: formData.mortgageLength,
       });
 
       // Track Google Ads conversion regardless of response
@@ -145,23 +137,14 @@ export default function LenderDetailPage() {
         });
       }
 
-      if (response.ok) {
+      if (result.success) {
         router.push("/thank-you");
       } else {
-        console.error("Form submission failed:", response.status);
-        router.push("/thank-you");
+        setSubmitResult({ success: false, error: result.error || "Something went wrong. Please try again." });
       }
     } catch (error) {
       console.error("Form submission error:", error);
-      // Fire conversion even on error since we're redirecting
-      if (typeof window !== "undefined" && typeof window.gtag === "function") {
-        window.gtag('event', 'conversion', {
-          send_to: 'AW-18036888328/0F27CIDX2Y4cEIim1JhD',
-          value: 1.0,
-          currency: 'GBP'
-        });
-      }
-      router.push("/thank-you");
+      setSubmitResult({ success: false, error: "Something went wrong. Please try again or call us directly." });
     } finally {
       setIsSubmitting(false);
     }
@@ -347,19 +330,8 @@ export default function LenderDetailPage() {
 
           <form
             onSubmit={handleSubmit}
-            name="lender-enquiry"
-            method="POST"
-            data-netlify="true"
-            netlify-honeypot="bot-field"
             className="bg-white/10 backdrop-blur-sm rounded-xl p-6 md:p-8"
           >
-            <input type="hidden" name="form-name" value="lender-enquiry" />
-            <input type="hidden" name="lenderName" value={lender.name} />
-            <p className="hidden">
-              <label>
-                Don't fill this out: <input name="bot-field" />
-              </label>
-            </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block text-white text-sm font-medium mb-2">
@@ -563,6 +535,12 @@ export default function LenderDetailPage() {
                 </span>
               </label>
             </div>
+
+            {submitResult && !submitResult.success && (
+              <div className="mb-4 text-red-400 bg-red-900/30 border border-red-400/50 rounded p-3 text-center">
+                {submitResult.error}
+              </div>
+            )}
 
             <button
               type="submit"
