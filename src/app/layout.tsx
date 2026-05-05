@@ -207,10 +207,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Tag Manager - must be as high as possible */}
+        {/* Google Tag Manager - deferred for better performance */}
         <Script
           id="gtm-script"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -277,10 +277,10 @@ export default function RootLayout({
           }}
         />
 
-        {/* Google Analytics 4 + Google Ads Tracking */}
+        {/* Google Analytics 4 + Google Ads Tracking - deferred for performance */}
         <Script
           id="gtag-init"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -298,7 +298,7 @@ export default function RootLayout({
         />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
         />
 
         {/* Facebook Pixel - Uncomment when you have your Pixel ID */}

@@ -1,15 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { lenders as allLenders } from "@/data/lenders";
 import { storeUTMParams } from "@/lib/tracking";
 import { submitLeadToSupabase } from "@/lib/api";
-import SocialProofNotification from "@/components/SocialProofNotification";
-import StickyMobileCTA from "@/components/StickyMobileCTA";
 import UrgencyBanner from "@/components/UrgencyBanner";
+
+// Lazy load non-critical components for better performance
+const SocialProofNotification = dynamic(
+  () => import("@/components/SocialProofNotification"),
+  { ssr: false }
+);
+const StickyMobileCTA = dynamic(
+  () => import("@/components/StickyMobileCTA"),
+  { ssr: false }
+);
 
 const PHONE_NUMBER = "01992 535 555";
 

@@ -1,6 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Performance optimizations
+  poweredByHeader: false,
+  compress: true,
+
+  // Optimize production builds
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
   images: {
+    // Optimize images for faster loading
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
