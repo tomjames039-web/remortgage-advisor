@@ -251,7 +251,7 @@ export default function Home() {
       <section
         className="relative bg-cover bg-center py-12 md:py-20"
         style={{
-          backgroundImage: `linear-gradient(rgba(28, 73, 83, 0.82), rgba(28, 73, 83, 0.88)), url('https://images.unsplash.com/photo-1578782785154-30ee3b8a3f95?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80')`,
+          backgroundImage: `linear-gradient(rgba(28, 73, 83, 0.85), rgba(28, 73, 83, 0.9)), url('https://images.unsplash.com/photo-1578782785154-30ee3b8a3f95?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=50')`,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -299,45 +299,52 @@ export default function Home() {
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
-                <label className="form-label form-label-required">Full Name</label>
+                <label htmlFor="fullName" className="form-label form-label-required">Full Name</label>
                 <input
                   type="text"
+                  id="fullName"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleInputChange}
                   className="input-field"
                   required
+                  aria-required="true"
                 />
               </div>
               <div>
-                <label className="form-label form-label-required">Email</label>
+                <label htmlFor="email" className="form-label form-label-required">Email</label>
                 <input
                   type="email"
+                  id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   className="input-field"
                   required
+                  aria-required="true"
                 />
               </div>
               <div>
-                <label className="form-label form-label-required">Contact Number</label>
+                <label htmlFor="contactNumber" className="form-label form-label-required">Contact Number</label>
                 <input
                   type="tel"
+                  id="contactNumber"
                   name="contactNumber"
                   value={formData.contactNumber}
                   onChange={handleInputChange}
                   className="input-field"
                   required
+                  aria-required="true"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
-                <label className="form-label">Additional Number</label>
+                <label htmlFor="additionalNumber" className="form-label">Additional Number</label>
                 <input
                   type="tel"
+                  id="additionalNumber"
                   name="additionalNumber"
                   value={formData.additionalNumber}
                   onChange={handleInputChange}
@@ -345,24 +352,28 @@ export default function Home() {
                 />
               </div>
               <div>
-                <label className="form-label form-label-required">Postcode</label>
+                <label htmlFor="postcode" className="form-label form-label-required">Postcode</label>
                 <input
                   type="text"
+                  id="postcode"
                   name="postcode"
                   value={formData.postcode}
                   onChange={handleInputChange}
                   className="input-field"
                   required
+                  aria-required="true"
                 />
               </div>
               <div>
-                <label className="form-label form-label-required">Current Lender</label>
+                <label htmlFor="currentLender" className="form-label form-label-required">Current Lender</label>
                 <select
+                  id="currentLender"
                   name="currentLender"
                   value={formData.currentLender}
                   onChange={handleInputChange}
                   className="select-field"
                   required
+                  aria-required="true"
                 >
                   {currentLenders.map((lender) => (
                     <option key={lender} value={lender === "Select your lender" ? "" : lender}>
@@ -375,40 +386,45 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
-                <label className="form-label form-label-required">Mortgage Amount</label>
+                <label htmlFor="mortgageAmount" className="form-label form-label-required">Mortgage Amount</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true">£</span>
                   <input
                     type="number"
+                    id="mortgageAmount"
                     name="mortgageAmount"
                     value={formData.mortgageAmount}
                     onChange={handleInputChange}
                     className="input-field pl-8"
                     placeholder="Enter amount"
                     required
+                    aria-required="true"
                   />
                 </div>
                 <span className="text-xs text-white/70">Please only enter numbers</span>
               </div>
               <div>
-                <label className="form-label form-label-required">Property Value</label>
+                <label htmlFor="propertyValue" className="form-label form-label-required">Property Value</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true">£</span>
                   <input
                     type="number"
+                    id="propertyValue"
                     name="propertyValue"
                     value={formData.propertyValue}
                     onChange={handleInputChange}
                     className="input-field pl-8"
                     placeholder="Enter value"
                     required
+                    aria-required="true"
                   />
                 </div>
                 <span className="text-xs text-white/70">Please only enter numbers</span>
               </div>
               <div>
-                <label className="form-label form-label-required">Mortgage Purpose</label>
+                <label htmlFor="mortgagePurpose" className="form-label form-label-required">Mortgage Purpose</label>
                 <select
+                  id="mortgagePurpose"
                   name="mortgagePurpose"
                   value={formData.mortgagePurpose}
                   onChange={handleInputChange}
@@ -426,29 +442,33 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div>
-                <label className="form-label form-label-required">Mortgage Length (years)</label>
+                <label htmlFor="mortgageLength" className="form-label form-label-required">Mortgage Length (years)</label>
                 <input
                   type="number"
+                  id="mortgageLength"
                   name="mortgageLength"
                   value={formData.mortgageLength}
                   onChange={handleInputChange}
                   className="input-field"
                   placeholder="e.g. 25"
                   required
+                  aria-required="true"
                 />
               </div>
               <div>
-                <label className="form-label form-label-required">Combined Annual Income</label>
+                <label htmlFor="combinedIncome" className="form-label form-label-required">Combined Annual Income</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true">£</span>
                   <input
                     type="number"
+                    id="combinedIncome"
                     name="combinedIncome"
                     value={formData.combinedIncome}
                     onChange={handleInputChange}
                     className="input-field pl-8"
                     placeholder="Enter income"
                     required
+                    aria-required="true"
                   />
                 </div>
                 <span className="text-xs text-white/70">Please only enter numbers</span>

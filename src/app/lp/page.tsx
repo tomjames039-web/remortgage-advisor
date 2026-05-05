@@ -160,7 +160,7 @@ export default function PPCLandingPage() {
         id="form"
         className="relative bg-cover bg-center py-10 md:py-16"
         style={{
-          backgroundImage: `linear-gradient(rgba(28, 73, 83, 0.82), rgba(28, 73, 83, 0.88)), url('https://images.unsplash.com/photo-1578782785154-30ee3b8a3f95?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80')`,
+          backgroundImage: `linear-gradient(rgba(28, 73, 83, 0.85), rgba(28, 73, 83, 0.9)), url('https://images.unsplash.com/photo-1578782785154-30ee3b8a3f95?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=50')`,
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

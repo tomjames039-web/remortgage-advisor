@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+/* Font loaded via next/font in layout.tsx for better performance */
 
 @tailwind base;
 @tailwind components;
@@ -21,11 +21,11 @@
 
   body {
     @apply bg-white text-foreground;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-poppins), system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-poppins), system-ui, sans-serif;
   }
 }
 

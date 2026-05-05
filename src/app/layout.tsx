@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Poppins } from "next/font/google";
 import "./globals.css";
+
+// Optimized font loading - prevents render blocking
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
+  preload: true,
+});
 
 // Google Tag Manager
 const GTM_ID = "GTM-5DNCNXGB";
@@ -225,27 +235,23 @@ export default function RootLayout({
         {/* Preload critical assets for faster page load */}
         <link
           rel="preconnect"
-          href="https://fonts.googleapis.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://www.googletagmanager.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
           href="https://images.unsplash.com"
           crossOrigin="anonymous"
         />
+        {/* Preload hero image for faster LCP */}
         <link
-          rel="preconnect"
-          href="https://app.trysoro.com"
-          crossOrigin="anonymous"
+          rel="preload"
+          as="image"
+          href="https://images.unsplash.com/photo-1578782785154-30ee3b8a3f95?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=50"
+          fetchPriority="high"
         />
         <link
           rel="dns-prefetch"
-          href="https://www.google-analytics.com"
+          href="https://www.googletagmanager.com"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://app.trysoro.com"
         />
 
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -321,7 +327,7 @@ export default function RootLayout({
           }}
         /> */}
       </head>
-      <body className="antialiased">
+      <body className={`${poppins.variable} font-sans antialiased`}>
         {/* Google Tag Manager (noscript) - immediately after opening body tag */}
         <noscript>
           <iframe
